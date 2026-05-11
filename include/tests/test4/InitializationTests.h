@@ -20,4 +20,6 @@
  */
 
 #include <tests/test4/gl/InitializationTest.h>
+#include <tests/test4/gl/MultithreadedInitializationTest.h>
 #include <tests/test4/vk/InitializationTest.h>
+#include <tests/test4/vk/MultithreadedInitializationTest.h>

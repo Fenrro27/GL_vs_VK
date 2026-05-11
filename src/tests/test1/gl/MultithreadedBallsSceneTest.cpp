@@ -2,6 +2,7 @@
 
 #include <base/ScopedTimer.h>
 
+#include <iostream>
 #include <GL/glew.h>
 #include <glm/vec4.hpp>
 
@@ -18,6 +19,7 @@ MultithreadedBallsSceneTest::MultithreadedBallsSceneTest(bool benchmarkMode, flo
 
 void MultithreadedBallsSceneTest::setup()
 {
+    std::cout << "[MultithreadedBallsSceneTest] setup start" << std::endl;
     GLTest::setup();
     initTestState();
 
@@ -25,10 +27,12 @@ void MultithreadedBallsSceneTest::setup()
     initProgram();
     initVBO();
     initVAO();
+    std::cout << "[MultithreadedBallsSceneTest] setup complete" << std::endl;
 }
 
 void MultithreadedBallsSceneTest::run()
 {
+    std::cout << "[MultithreadedBallsSceneTest] run start" << std::endl;
     while (!window_.shouldClose()) {
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -102,13 +106,20 @@ void MultithreadedBallsSceneTest::initVAO()
 
 void MultithreadedBallsSceneTest::updateStateMultithreaded()
 {
-    static const std::size_t threadCount = std::thread::hardware_concurrency();
+    std::size_t threadCount = std::thread::hardware_concurrency();
+    if (threadCount == 0) {
+        threadCount = 1u;
+    }
 
     std::vector<std::thread> threads(threadCount);
     for (std::size_t threadIndex = 0; threadIndex < threadCount; ++threadIndex) {
         std::size_t k = balls().size() / threadCount;
         std::size_t rangeFrom = threadIndex * k;
         std::size_t rangeTo = (threadIndex + 1) * k;
+
+        if (threadIndex + 1 == threadCount) {
+            rangeTo = balls().size();
+        }
 
         threads[threadIndex] =
             std::move(std::thread(&MultithreadedBallsSceneTest::updatePartialState, this, rangeFrom, rangeTo));

@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <tests/common/TerrainLoD.h>
 
 #include <glm/geometric.hpp>

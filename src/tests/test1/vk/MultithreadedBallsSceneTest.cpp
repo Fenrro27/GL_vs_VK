@@ -84,7 +84,10 @@ void MultithreadedBallsSceneTest::createCommandBuffers()
 
 void MultithreadedBallsSceneTest::createSecondaryCommandBuffers()
 {
-    static const std::size_t threads = std::thread::hardware_concurrency();
+    std::size_t threads = std::thread::hardware_concurrency();
+    if (threads == 0) {
+        threads = 1u;
+    }
 
     _threadCmdPools.resize(threads);
     for (auto& sndCmdPool : _threadCmdPools) {
@@ -245,7 +248,7 @@ void MultithreadedBallsSceneTest::createPipeline()
                                                 _pipelineLayout,
                                                 _renderPass,
                                                 0};
-    _pipeline = device().createGraphicsPipeline({}, pipelineInfo);
+    _pipeline = device().createGraphicsPipeline({}, pipelineInfo).value;
 }
 
 void MultithreadedBallsSceneTest::destroyPipeline()

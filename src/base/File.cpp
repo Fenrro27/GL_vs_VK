@@ -16,11 +16,39 @@ bool File::exists(const std::string& path)
     return result;
 }
 
+static bool openFileStream(std::ifstream& file, const std::string& path)
+{
+    file.open(path, std::ios::in);
+    if (file.is_open())
+        return true;
+
+    if (path.rfind("resources/", 0) == 0) {
+        file.open(std::string("bin/") + path, std::ios::in);
+        return file.is_open();
+    }
+
+    return false;
+}
+
+static bool openBinaryFileStream(std::ifstream& file, const std::string& path)
+{
+    file.open(path, std::ios::in | std::ios::binary);
+    if (file)
+        return true;
+
+    if (path.rfind("resources/", 0) == 0) {
+        file.open(std::string("bin/") + path, std::ios::in | std::ios::binary);
+        return static_cast<bool>(file);
+    }
+
+    return false;
+}
+
 std::string File::readText(const std::string& path, bool throwException)
 {
     std::string result;
-    std::ifstream fileStream(path, std::fstream::in);
-    if (fileStream.is_open()) {
+    std::ifstream fileStream;
+    if (openFileStream(fileStream, path)) {
         std::string line = "";
 
         while (std::getline(fileStream, line)) {
@@ -46,8 +74,8 @@ std::string File::readText(const std::string& path, bool throwException)
 std::string File::readBinary(const std::string& path, bool throwException)
 {
     std::string result;
-    std::ifstream file(path, std::ios::in | std::ios::binary);
-    if (file) {
+    std::ifstream file;
+    if (openBinaryFileStream(file, path)) {
         file.seekg(0, std::ios::end);
         result.resize(static_cast<std::size_t>(file.tellg()));
         file.seekg(0, std::ios::beg);
@@ -66,8 +94,8 @@ std::string File::readBinary(const std::string& path, bool throwException)
 std::vector<uint8_t> File::readBinaryBytes(const std::string& path, bool throwException)
 {
     std::vector<uint8_t> result;
-    std::ifstream file(path, std::ios::in | std::ios::binary);
-    if (file) {
+    std::ifstream file;
+    if (openBinaryFileStream(file, path)) {
         file.seekg(0, std::ios::end);
         result.resize(static_cast<std::size_t>(file.tellg()));
         file.seekg(0, std::ios::beg);
@@ -86,6 +114,9 @@ std::vector<uint8_t> File::readBinaryBytes(const std::string& path, bool throwEx
 bool File::writeBinaryBytes(const std::string& path, std::vector<uint8_t> data, bool throwException)
 {
     std::ofstream file(path, std::ios::out | std::ios::binary);
+    if (!file && path.rfind("resources/", 0) == 0) {
+        file.open(std::string("bin/") + path, std::ios::out | std::ios::binary);
+    }
 
     if (file) {
         file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(data.front()));

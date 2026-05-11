@@ -238,7 +238,7 @@ void InitializationTest::createPipeline()
                                                 _pipelineLayout,
                                                 _renderPass,
                                                 0};
-    _pipeline = device().createGraphicsPipeline(_pipelineCache, pipelineInfo);
+    _pipeline = device().createGraphicsPipeline(_pipelineCache, pipelineInfo).value;
 }
 
 void InitializationTest::destroyPipeline()

@@ -61,6 +61,9 @@ void Window::update()
 
 bool Window::shouldClose() const
 {
+    if (!_handle) {
+        return true;
+    }
     return (glfwWindowShouldClose(_handle) != 0);
 }
 

@@ -12,6 +12,18 @@ class BenchmarkableTest : public TestInterface
     virtual ~BenchmarkableTest() = default;
 
     virtual void printStatistics() const;
+
+    struct Statistics {
+        double minFrameTime;
+        double maxFrameTime;
+        double avgFrameTime;
+        double maxFPS;
+        double minFPS;
+        double avgFPS;
+    };
+
+    Statistics getStatistics() const;
+
     void startMeasuring();
     void startMeasuring(double startTime);
 

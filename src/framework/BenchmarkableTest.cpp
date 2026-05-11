@@ -41,11 +41,36 @@ void BenchmarkableTest::printStatistics() const
     std::cout << "=====================" << std::endl;
     std::cout << "  Minimum frame time: " << toMs(_minFrameTime) << std::endl;
     std::cout << "  Maximum frame time: " << toMs(_maxFrameTime) << std::endl;
-    std::cout << "  Average frame time: " << toMs(_measuredTime / static_cast<double>(_frameCount)) << std::endl;
-    std::cout << std::endl;
-    std::cout << "  Maximum FPS: " << toFps(_minFrameTime) << std::endl;
-    std::cout << "  Minimum FPS: " << toFps(_maxFrameTime) << std::endl;
-    std::cout << "  Average FPS: " << toFps(_measuredTime / static_cast<double>(_frameCount)) << std::endl;
+    if (_frameCount > 0) {
+        std::cout << "  Average frame time: " << toMs(_measuredTime / static_cast<double>(_frameCount)) << std::endl;
+        std::cout << std::endl;
+        std::cout << "  Maximum FPS: " << toFps(_minFrameTime) << std::endl;
+        std::cout << "  Minimum FPS: " << toFps(_maxFrameTime) << std::endl;
+        std::cout << "  Average FPS: " << toFps(_measuredTime / static_cast<double>(_frameCount)) << std::endl;
+    } else {
+        std::cout << "  Average frame time: ---" << std::endl;
+        std::cout << std::endl;
+        std::cout << "  Maximum FPS: " << toFps(_minFrameTime) << std::endl;
+        std::cout << "  Minimum FPS: " << toFps(_maxFrameTime) << std::endl;
+        std::cout << "  Average FPS: ---" << std::endl;
+    }
+}
+
+BenchmarkableTest::Statistics BenchmarkableTest::getStatistics() const
+{
+    if (!_benchmarkEnabled || _frameCount == 0 || _measuredTime <= 0.0) {
+        return {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    }
+
+    double avgFrameTime = _measuredTime / static_cast<double>(_frameCount);
+    return {
+        _minFrameTime,
+        _maxFrameTime,
+        avgFrameTime,
+        _minFrameTime > 0.0 ? 1.0 / _minFrameTime : 0.0,
+        _maxFrameTime > 0.0 ? 1.0 / _maxFrameTime : 0.0,
+        avgFrameTime > 0.0 ? 1.0 / avgFrameTime : 0.0
+    };
 }
 
 void BenchmarkableTest::startMeasuring()
