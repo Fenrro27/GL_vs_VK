@@ -93,7 +93,8 @@ int TestRunner::run_gl(int testNumber, bool multithreaded, bool benchmarkMode, f
 
     case 2:
         if (multithreaded) {
-            // N/A
+            test = std::unique_ptr<BenchmarkableTest>(
+                new tests::test_gl::MultithreadedTerrainSceneTest(benchmarkMode, benchmarkTime));
         } else {
             test =
                 std::unique_ptr<BenchmarkableTest>(new tests::test_gl::TerrainSceneTest(benchmarkMode, benchmarkTime));
@@ -102,7 +103,8 @@ int TestRunner::run_gl(int testNumber, bool multithreaded, bool benchmarkMode, f
 
     case 3:
         if (multithreaded) {
-            // N/A
+            test = std::unique_ptr<BenchmarkableTest>(
+                new tests::test_gl::MultithreadedShadowMappingSceneTest(benchmarkMode, benchmarkTime));
         } else {
             test = std::unique_ptr<BenchmarkableTest>(
                 new tests::test_gl::ShadowMappingSceneTest(benchmarkMode, benchmarkTime));
@@ -110,7 +112,7 @@ int TestRunner::run_gl(int testNumber, bool multithreaded, bool benchmarkMode, f
         break;
     case 4:
         if (multithreaded) {
-            // N/A
+            test = std::unique_ptr<BenchmarkableTest>(new tests::test_gl::MultithreadedInitializationTest());
         } else {
             test = std::unique_ptr<BenchmarkableTest>(new tests::test_gl::InitializationTest());
         }
@@ -161,7 +163,7 @@ int TestRunner::run_vk(int testNumber, bool multithreaded, bool benchmarkMode, f
         break;
     case 4:
         if (multithreaded) {
-            // N/A
+            test = std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedInitializationTest());
         } else {
             test = std::unique_ptr<BenchmarkableTest>(new tests::test_vk::InitializationTest());
         }
@@ -226,53 +228,29 @@ std::vector<TestResult> TestRunner::runAllTests() {
         }
     };
 
-    // Test 1 GL simple
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::SimpleBallsSceneTest(true, 5.0f)), 1, "GL", false,
-                     "[GL] SimpleBallsSceneTest");
+    // Test 1
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::SimpleBallsSceneTest(true, 5.0f)), 1, "GL", false, "[GL] SimpleBallsSceneTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::MultithreadedBallsSceneTest(true, 5.0f)), 1, "GL", true, "[GL] MultithreadedBallsSceneTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::SimpleBallsSceneTest(true, 5.0f)), 1, "VK", false, "[VK] SimpleBallsSceneTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedBallsSceneTest(true, 5.0f)), 1, "VK", true, "[VK] MultithreadedBallsSceneTest");
 
-    // GL multithreaded
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::MultithreadedBallsSceneTest(true, 5.0f)), 1, "GL", true,
-                     "[GL] MultithreadedBallsSceneTest");
+    // Test 2
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::TerrainSceneTest(true, 5.0f)), 2, "GL", false, "[GL] TerrainSceneTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::MultithreadedTerrainSceneTest(true, 5.0f)), 2, "GL", true, "[GL] MultithreadedTerrainSceneTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::TerrainSceneTest(true, 5.0f)), 2, "VK", false, "[VK] TerrainSceneTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedTerrainSceneTest(true, 5.0f)), 2, "VK", true, "[VK] MultithreadedTerrainSceneTest");
 
-    // VK simple
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::SimpleBallsSceneTest(true, 5.0f)), 1, "VK", false,
-                     "[VK] SimpleBallsSceneTest");
+    // Test 3
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::ShadowMappingSceneTest(true, 5.0f)), 3, "GL", false, "[GL] ShadowMappingSceneTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::MultithreadedShadowMappingSceneTest(true, 5.0f)), 3, "GL", true, "[GL] MultithreadedShadowMappingSceneTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::ShadowMappingSceneTest(true, 5.0f)), 3, "VK", false, "[VK] ShadowMappingSceneTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedShadowMappingSceneTest(true, 5.0f)), 3, "VK", true, "[VK] MultithreadedShadowMappingSceneTest");
 
-    // VK multithreaded
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedBallsSceneTest(true, 5.0f)), 1, "VK", true,
-                     "[VK] MultithreadedBallsSceneTest");
-
-    // Test 2 GL
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::TerrainSceneTest(true, 5.0f)), 2, "GL", false,
-                     "[GL] TerrainSceneTest");
-
-    // Test 2 VK simple
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::TerrainSceneTest(true, 5.0f)), 2, "VK", false,
-                     "[VK] TerrainSceneTest");
-
-    // Test 2 VK multithreaded
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedTerrainSceneTest(true, 5.0f)), 2, "VK", true,
-                     "[VK] MultithreadedTerrainSceneTest");
-
-    // Test 3 GL
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::ShadowMappingSceneTest(true, 5.0f)), 3, "GL", false,
-                     "[GL] ShadowMappingSceneTest");
-
-    // Test 3 VK simple
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::ShadowMappingSceneTest(true, 5.0f)), 3, "VK", false,
-                     "[VK] ShadowMappingSceneTest");
-
-    // Test 3 VK multithreaded
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedShadowMappingSceneTest(true, 5.0f)), 3, "VK", true,
-                     "[VK] MultithreadedShadowMappingSceneTest");
-
-    // Test 4 GL
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::InitializationTest()), 4, "GL", false,
-                     "[GL] InitializationTest");
-
-    // Test 4 VK
-    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::InitializationTest()), 4, "VK", false,
-                     "[VK] InitializationTest");
+    // Test 4
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::InitializationTest()), 4, "GL", false, "[GL] InitializationTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::MultithreadedInitializationTest()), 4, "GL", true, "[GL] MultithreadedInitializationTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::InitializationTest()), 4, "VK", false, "[VK] InitializationTest");
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedInitializationTest()), 4, "VK", true, "[VK] MultithreadedInitializationTest");
 
     return results;
 }

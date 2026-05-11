@@ -22,6 +22,7 @@
  *
  */
 
+#include <tests/test2/gl/MultithreadedTerrainSceneTest.h>
 #include <tests/test2/gl/TerrainSceneTest.h>
 #include <tests/test2/vk/MultithreadedTerrainSceneTest.h>
 #include <tests/test2/vk/TerrainSceneTest.h>
