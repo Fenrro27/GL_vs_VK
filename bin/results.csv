@@ -1,0 +1,3 @@
+Test,API,Multithreaded,TestName,MinFrameTime,MaxFrameTime,AvgFrameTime,MaxFPS,MinFPS,AvgFPS
+1,GL,No,"[GL] SimpleBallsSceneTest",0,0,0,0,0,0
+1,GL,Yes,"[GL] MultithreadedBallsSceneTest",0,0,0,0,0,0

@@ -7,6 +7,8 @@
 
 namespace base {
 namespace gl {
+static bool glfwInitialized = false;
+static bool glewInitialized = false;
 bool Window::_hintsSet = false;
 
 Window::Window(const glm::uvec2& size, const std::string& title)
@@ -75,8 +77,12 @@ void Window::update()
             setFPSCount(static_cast<unsigned int>(_framesCount * (1.0 / _fpsTime)));
 
             if (isDisplayingFPS())
+if (_framesCount > 0) {
                 appendTitle(std::string(" | ") + std::to_string((_fpsTime * 1000.0) / _framesCount) +
                             std::string("ms | FPS: ") + std::to_string(getFPS()));
+            } else {
+                appendTitle(std::string(" | ") + std::string("---ms | FPS: ") + std::to_string(getFPS()));
+            }
 
             if (_fpsCountCallback)
                 _fpsCountCallback(getFPS());
@@ -209,6 +215,9 @@ bool Window::isCreated() const
 
 bool Window::shouldClose() const
 {
+    if (!isCreated()) {
+        return true;
+    }
     return glfwWindowShouldClose(_handle) == GL_TRUE;
 }
 
@@ -225,13 +234,13 @@ GLFWwindow* Window::getHandle()
 void Window::deinitialize()
 {
     glfwTerminate();
+    glfwInitialized = false;
+    glewInitialized = false;
 }
 
 void Window::initializeGLFW()
 {
-    static bool initialized = false;
-
-    if (initialized == false) {
+    if (glfwInitialized == false) {
         // Setting error callback
         static auto errorCallbackFunc = [](int error, const char* description) {
             std::cerr << "[GLFW] Error #" + std::to_string(error) + std::string(": ") + description << std::endl;
@@ -245,15 +254,13 @@ void Window::initializeGLFW()
             throw std::runtime_error("Failed to initialize GLFW library.");
         }
 
-        initialized = true;
+        glfwInitialized = true;
     }
 }
 
 void Window::initializeGLEW()
 {
-    static bool initialized = false;
-
-    if (initialized == false) {
+    if (glewInitialized == false) {
         glewExperimental = GL_TRUE;
 
         if (glewInit() != GLEW_OK) {
@@ -261,7 +268,7 @@ void Window::initializeGLEW()
             throw std::runtime_error("Failed to initialize GLEW library.");
         }
 
-        initialized = true;
+        glewInitialized = true;
     }
 }
 
@@ -292,6 +299,8 @@ void Window::setHints(const std::vector<std::pair<int, int>>& hints)
 
 void Window::setDefaultHints()
 {
+    glfwDefaultWindowHints();
+    setHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
     setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     setHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     setHint(GLFW_CONTEXT_VERSION_MINOR, 3);

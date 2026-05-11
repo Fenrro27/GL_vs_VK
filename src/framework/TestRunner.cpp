@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <fstream>
 
 namespace {
 const float kDefaultTestBenchmarkTime = 15.0f; // 15 seconds
@@ -24,13 +25,14 @@ int TestRunner::run()
 
     auto errorCallback = [&](const std::string& msg) -> int {
         std::cerr << "Invalid usage! " << msg << std::endl;
-        std::cerr << "Usage: `" << arguments.getPath() << " -t N -api API [-m] [-benchmark] [-time T]`" << std::endl;
+        std::cerr << "Usage: `" << arguments.getPath() << " -t N -api API [-m] [-benchmark] [-time T] | -all`" << std::endl;
         std::cerr << "  -t N        - test number (in range [1, " << TESTS << "])" << std::endl;
         std::cerr << "  -api API    - API (`gl` or `vk`)" << std::endl;
         std::cerr << "  -m          - run multithreaded version (if exists)" << std::endl;
         std::cerr << "  -benchmark  - run in benchmark mode" << std::endl;
         std::cerr << "  -time T     - change benchmark duraton to T seconds" << std::endl;
         std::cerr << "                default value is 15 seconds" << std::endl;
+        std::cerr << "  -all        - run all tests and generate CSV" << std::endl;
         return -1;
     };
 
@@ -199,5 +201,79 @@ int TestRunner::run_any(std::unique_ptr<BenchmarkableTest> test, double testStar
     }
 
     return 0;
+}
+
+std::vector<TestResult> TestRunner::runAllTests() {
+    std::vector<TestResult> results;
+
+    auto runBenchmarkTest = [&](std::unique_ptr<BenchmarkableTest> test, int testNum, const std::string& api,
+                                bool multithreaded, const std::string& description) {
+        if (!test)
+            return;
+
+        try {
+            std::cout << "[runAllTests] Running " << description << std::endl;
+            test->startMeasuring(BenchmarkableTest::getCurrentTime());
+            test->setup();
+            test->run();
+            test->teardown();
+            results.push_back(TestResult{testNum, api, multithreaded, description, test->getStatistics()});
+            std::cout << "[runAllTests] Completed " << description << std::endl;
+        } catch (const std::exception& ex) {
+            std::cerr << "[runAllTests] " << description << " failed: " << ex.what() << std::endl;
+        } catch (...) {
+            std::cerr << "[runAllTests] " << description << " failed with unknown exception" << std::endl;
+        }
+    };
+
+    // Test 1 GL simple
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::SimpleBallsSceneTest(true, 5.0f)), 1, "GL", false,
+                     "[GL] SimpleBallsSceneTest");
+
+    // GL multithreaded
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::MultithreadedBallsSceneTest(true, 5.0f)), 1, "GL", true,
+                     "[GL] MultithreadedBallsSceneTest");
+
+    // VK simple
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::SimpleBallsSceneTest(true, 5.0f)), 1, "VK", false,
+                     "[VK] SimpleBallsSceneTest");
+
+    // VK multithreaded
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedBallsSceneTest(true, 5.0f)), 1, "VK", true,
+                     "[VK] MultithreadedBallsSceneTest");
+
+    // Test 2 GL
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::TerrainSceneTest(true, 5.0f)), 2, "GL", false,
+                     "[GL] TerrainSceneTest");
+
+    // Test 2 VK simple
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::TerrainSceneTest(true, 5.0f)), 2, "VK", false,
+                     "[VK] TerrainSceneTest");
+
+    // Test 2 VK multithreaded
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedTerrainSceneTest(true, 5.0f)), 2, "VK", true,
+                     "[VK] MultithreadedTerrainSceneTest");
+
+    // Test 3 GL
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::ShadowMappingSceneTest(true, 5.0f)), 3, "GL", false,
+                     "[GL] ShadowMappingSceneTest");
+
+    // Test 3 VK simple
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::ShadowMappingSceneTest(true, 5.0f)), 3, "VK", false,
+                     "[VK] ShadowMappingSceneTest");
+
+    // Test 3 VK multithreaded
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::MultithreadedShadowMappingSceneTest(true, 5.0f)), 3, "VK", true,
+                     "[VK] MultithreadedShadowMappingSceneTest");
+
+    // Test 4 GL
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_gl::InitializationTest()), 4, "GL", false,
+                     "[GL] InitializationTest");
+
+    // Test 4 VK
+    runBenchmarkTest(std::unique_ptr<BenchmarkableTest>(new tests::test_vk::InitializationTest()), 4, "VK", false,
+                     "[VK] InitializationTest");
+
+    return results;
 }
 }

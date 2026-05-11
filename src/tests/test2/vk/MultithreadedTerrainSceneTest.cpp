@@ -262,7 +262,7 @@ void MultithreadedTerrainSceneTest::createPipeline()
                                                 _pipelineLayout,
                                                 _renderPass,
                                                 0};
-    _pipeline = device().createGraphicsPipeline({}, pipelineInfo);
+    _pipeline = device().createGraphicsPipeline({}, pipelineInfo).value;
 }
 
 void MultithreadedTerrainSceneTest::destroyPipeline()

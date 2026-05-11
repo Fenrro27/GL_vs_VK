@@ -231,7 +231,7 @@ void SimpleBallsSceneTest::createPipeline()
                                                 _pipelineLayout,
                                                 _renderPass,
                                                 0};
-    _pipeline = device().createGraphicsPipeline({}, pipelineInfo);
+    _pipeline = device().createGraphicsPipeline({}, pipelineInfo).value;
 }
 
 void SimpleBallsSceneTest::destroyPipeline()

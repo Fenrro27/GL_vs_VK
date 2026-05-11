@@ -536,7 +536,7 @@ vk::Pipeline ShadowMappingSceneTest::createPipeline(const VkProgram& program,
                                                 layout,
                                                 renderPass,
                                                 0};
-    return device().createGraphicsPipeline({}, pipelineInfo);
+    return device().createGraphicsPipeline({}, pipelineInfo).value;
 }
 
 void ShadowMappingSceneTest::destroyPipeline(vk::Pipeline& pipeline)

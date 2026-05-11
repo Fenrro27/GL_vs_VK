@@ -554,7 +554,7 @@ vk::Pipeline MultithreadedShadowMappingSceneTest::createPipeline(const VkProgram
                                                 layout,
                                                 renderPass,
                                                 0};
-    return device().createGraphicsPipeline({}, pipelineInfo);
+    return device().createGraphicsPipeline({}, pipelineInfo).value;
 }
 
 void MultithreadedShadowMappingSceneTest::destroyPipeline(vk::Pipeline& pipeline)
